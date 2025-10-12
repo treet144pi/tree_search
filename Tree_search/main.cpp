@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Tree.hpp"
-
+#include <utility>
 
 int main()
 {
@@ -22,8 +22,6 @@ int main()
             {
                 int fst_key, snd_key;
                 std::cin >> fst_key >> snd_key;
-                if (fst_key > snd_key)
-                    std::cout<<0 << ' ';
                 std::cout << tree.range_query(fst_key,snd_key)<<' ';
                 break;
             }

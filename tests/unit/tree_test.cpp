@@ -3,6 +3,45 @@
 
 using ST = Trees::SearchTree<int>;
 
+TEST(Bounds, EmptyTree)
+{
+    ST t;
+    auto lb = t.lower_bound(89); EXPECT_EQ(lb,nullptr);
+    auto ub = t.lower_bound(52); EXPECT_EQ(ub,nullptr);
+}
+TEST(RangeQuery, EmptyTree)
+{
+    ST t;
+    EXPECT_EQ(t.range_query(40,50),0);
+}
+
+TEST(MinimumAndSuccessor,EmptyTree)
+{
+    ST t;
+    EXPECT_EQ(t.minimum(t.root()), nullptr);
+    EXPECT_EQ(t.successor(nullptr), nullptr);
+}
+
+TEST(Minimum,FindMiniumSubTree)
+{
+    ST t;
+    for (int x: {20,53,89,37}) t.insert(x);
+    auto min20 =t.minimum(t.root()); ASSERT_NE(min20,nullptr); EXPECT_EQ(min20->key_,20);// minimum == 20
+
+    t.insert(5);
+    auto min5 =t.minimum(t.root()); ASSERT_NE(min5,nullptr); EXPECT_EQ(min5->key_,5);// minimum == 5
+
+    t.insert(6);
+    auto remin5 =t.minimum(t.root()); ASSERT_NE(remin5,nullptr); EXPECT_EQ(remin5->key_,5); // minimum == 5
+
+    t.insert(1);
+    auto min1 =t.minimum(t.root()); ASSERT_NE(min1,nullptr); EXPECT_EQ(min1->key_,1);// minimum == 1
+
+    t.insert(-6);
+    auto minminus6 =t.minimum(t.root()); ASSERT_NE(minminus6,nullptr); EXPECT_EQ(minminus6->key_,-6);// minimum == 1
+
+
+}
 
 TEST(InsertAndOrder, BasicInorderBySuccessor) {
     ST t;

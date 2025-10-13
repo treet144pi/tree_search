@@ -1,14 +1,18 @@
 cmake_minimum_required(VERSION 3.16)
-
-project(TreeAVL CXX)
+project(TreeSearchAVL CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
 add_library(trees INTERFACE)
 target_include_directories(trees INTERFACE ${CMAKE_SOURCE_DIR}/include)
-add_executable(task src/main.cpp)
-target_link_libraries(task PRIVATE trees)
 
-enable_testing()
-add_subdirectory(tests)
+add_executable(task src/main.cpp src/runner.cpp)
+target_include_directories(task PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(task PRIVATE trees)
+include(CTest)
+if (BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

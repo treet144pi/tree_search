@@ -7,7 +7,7 @@ TEST(Bounds, EmptyTree)
 {
     ST t;
     auto lb = t.lower_bound(89); EXPECT_EQ(lb,nullptr);
-    auto ub = t.lower_bound(52); EXPECT_EQ(ub,nullptr);
+    auto ub = t.upper_bound(52); EXPECT_EQ(ub,nullptr);
 }
 TEST(RangeQuery, EmptyTree)
 {
@@ -75,6 +75,15 @@ TEST(RangeQuery, HalfOpenRightInclusive) {
     EXPECT_EQ(t.range_query(5,10),  1); // (5,10]  -> {10}
     EXPECT_EQ(t.range_query(40,100),0); // (40,100] -> {}
     EXPECT_EQ(t.range_query(30,30), 0); // a>=b -> 0
+}
+
+TEST(Inorder, SortedStrictlyIncreasing)
+{
+    ST t; for (int x: {5,3,7,1,4,6,8}) t.insert(x);
+    std::vector<int> v;
+    for (auto p = t.minimum(t.root()); p; p = t.successor(p)) v.push_back(p->key_);
+    for (size_t i = 1; i < v.size(); ++i) EXPECT_LT(v[i-1], v[i]);
+    EXPECT_EQ((std::vector<int>{1,3,4,5,6,7,8}), v);
 }
 
 TEST(RuleOfFive, CopyAndMove) {

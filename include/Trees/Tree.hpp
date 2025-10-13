@@ -1,3 +1,7 @@
+#ifndef TREE_SEARCH_TREE_HPP
+#define TREE_SEARCH_TREE_HPP
+
+
 #include <functional>
 #ifndef NDEBUG
 #include <cassert>
@@ -459,3 +463,5 @@ namespace Trees {
 
 
 }
+
+#endif

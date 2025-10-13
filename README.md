@@ -31,7 +31,11 @@
 └─ build/                      # генерируется CMake (в .gitignore)
 ```
 
-
+---
+## Установка
+```
+git clone git@github.com:treet144pi/tree_search.git
+```
 ---
 
 ## Сборка

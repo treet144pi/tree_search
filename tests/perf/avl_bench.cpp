@@ -23,7 +23,7 @@ static void Insert(benchmark::State& st) {
         benchmark::DoNotOptimize(t.root());
     }
 }
-BENCHMARK(Insert)->Arg(1000)->Arg(10000)->Arg(100000);
+BENCHMARK(Insert)->Arg(10000)->Arg(100000);
 
 
 //---------------------------------------------------------------------------------------------------------------
@@ -84,6 +84,7 @@ static void RangeQuery(benchmark::State& st) {
     }
 }
 BENCHMARK(RangeQuery)->Arg(10000)->Arg(100000);
+//---------------------------------------------------------------------------------------------------------------
 
 
 BENCHMARK_MAIN();

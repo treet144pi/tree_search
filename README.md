@@ -1,15 +1,14 @@
 # Tree Search (AVL)
----
+
+
 ## Требования
 
-- CMake ≥ 3.16
-- Компилятор с поддержкой C++17 (g++/clang++)
-- Интернет для загрузки GoogleTest (FetchContent)
+- CMake >= 3.16
+- C++17 (g++/clang++)
 
 ---
 
 ## Структура проекта
-
 ```
 .
 ├─ CMakeLists.txt
@@ -17,40 +16,42 @@
 │  └─ Trees/
 │     └─ Tree.hpp              # шаблонный класс AVL-дерева
 ├─ src/
-│  ├─ runner.hpp               # int launcher(std::istream&, std::ostream&)
-│  ├─ runner.cpp               # реализация протокола k / q поверх дерева
+│  ├─ runner.hpp
+│  ├─ runner.cpp               # протокол команд
 │  └─ main.cpp                 # int main(){ return launcher(cin, cout); }
 ├─ tests/
 │  ├─ CMakeLists.txt
-│  ├─ e2e_runner.cpp           # e2e-раннер: ищет пары .in/.out и сравнивает
+│  ├─ e2e_runner.cpp           # e2e-раннер: находит .in/.out и сравнивает
 │  ├─ unit/
-│  │  └─ tree_test.cpp         # GoogleTest-юниты
+│  │  └─ tree_test.cpp         # GoogleTest
+│  ├─ perf/
+│  │  └─ avl_bench.cpp         # Google Benchmark
 │  └─ e2e/
 │     ├─ in/                   # входные .in
 │     └─ out/                  # ожидаемые .out
-└─ build/                      # генерируется CMake (в .gitignore)
+└─ build/
 ```
 
 ---
 ## Установка
-```
-git clone git@github.com:treet144pi/tree_search.git
-```
----
 
+git clone git@github.com:treet144pi/tree_search.git
+
+
+---
 ## Сборка
 
-```bash
 rm -rf build
-cmake -S . -B build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-```
 
-После сборки будут бинарники:
+После сборки появятся бинарники:
 
-- приложение: `./build/task`
-- юнит-тесты: `./build/tests/unit_tests`
-- e2e-раннер: `./build/tests/e2e`
+- приложение: ./build/task
+- юнит-тесты: ./build/tests/unit_tests
+- e2e-раннер: ./build/tests/e2e
+- бенчмарки: ./build/tests/avl_bench
+
 
 ---
 
@@ -75,8 +76,8 @@ cmake --build build -j
 - `k X` — вставить ключ `X` (дубликаты игнорируются)
 - `q A B` — вывести количество ключей в полуинтервале **(A, B]**
 
----
 
+---
 ## Юнит-тесты (GoogleTest)
 
 
@@ -87,6 +88,7 @@ cmake --build build -j
 ```
 
 ---
+
 
 ## E2E-тесты (через раннер)
 
@@ -135,25 +137,43 @@ cmake --build build -j
   ```
 
 ---
+## Бенчмарки (Google Benchmark)
+
+Запуск:
+./build/tests/avl_bench
+
+Что меряется
+- Insert — вставка 10 000 и 100 000 случайных ключей в пустое дерево
+- LowerBound b UpperBound — 10 000 и 100 000 запросов поиска
+- RangeQuery — 10 000 и 100 000  диапазонных запросов (a, b]
+
+---
+
+## Частые проблемы
+
+- No such file or directory [tests/e2e/in] — запускайте e2e-раннер из корня и проверьте наличие tests/e2e/in и tests/e2e/out
+
+---
+
+## Ссылки на используемые библиотеки
+
+- Google Benchmark — https://github.com/google/benchmark
+- GoogleTest —  https://github.com/google/googletest
+
+---
 
 ## Полезные команды
 
-```bash
-# пересобрать после правок
-cmake --build build -j
+# Полная пересборка (Release)
+rm -rf build && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
 
-# только юниты
+
+# Юниты
 ./build/tests/unit_tests
 
-# только e2e
+# E2E
 ./build/tests/e2e
-```
 
----
-
-## Проблемы
-
-- **`No such file or directory [tests/e2e/in]`**
-  Запускайте раннер из корня (`./build/tests/e2e`).
----
-
+# Бенчи (5 повторов, агрегаты)
+./build/tests/avl_bench --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
+"""

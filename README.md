@@ -34,9 +34,9 @@
 
 ---
 ## Установка
-
+  ```
 git clone git@github.com:treet144pi/tree_search.git
-
+  ```
 
 ---
 ## Сборка
@@ -46,12 +46,12 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 
 После сборки появятся бинарники:
-
+  ```
 - приложение: ./build/task
 - юнит-тесты: ./build/tests/unit_tests
 - e2e-раннер: ./build/tests/e2e
 - бенчмарки: ./build/tests/avl_bench
-
+  ```
 
 ---
 
@@ -140,13 +140,15 @@ cmake --build build -j
 ## Бенчмарки (Google Benchmark)
 
 Запуск:
+  ```
 ./build/tests/avl_bench
-
+  ```
 Что меряется
+  ```
 - Insert — вставка 10 000 и 100 000 случайных ключей в пустое дерево
 - LowerBound b UpperBound — 10 000 и 100 000 запросов поиска
 - RangeQuery — 10 000 и 100 000  диапазонных запросов (a, b]
-
+  ```
 ---
 
 ## Частые проблемы
@@ -156,24 +158,24 @@ cmake --build build -j
 ---
 
 ## Ссылки на используемые библиотеки
-
+  ```
 - Google Benchmark — https://github.com/google/benchmark
 - GoogleTest —  https://github.com/google/googletest
-
+  ```
 ---
 
 ## Полезные команды
 
-# Полная пересборка (Release)
+Полная пересборка (Release)
 rm -rf build && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
 
 
-# Юниты
+Юниты
 ./build/tests/unit_tests
 
-# E2E
+E2E
 ./build/tests/e2e
 
-# Бенчи (5 повторов, агрегаты)
+Бенчи (5 повторов, агрегаты)
 ./build/tests/avl_bench --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
 """

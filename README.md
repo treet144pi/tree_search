@@ -171,11 +171,14 @@ rm -rf build && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build 
 
 
 Юниты
+  ```
 ./build/tests/unit_tests
-
+  ```
 E2E
+  ```
 ./build/tests/e2e
-
+  ```
 Бенчи (5 повторов, агрегаты)
+  ```
 ./build/tests/avl_bench --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
-"""
+  ```

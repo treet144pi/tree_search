@@ -40,11 +40,11 @@ git clone git@github.com:treet144pi/tree_search.git
 
 ---
 ## Сборка
-
+  ```
 rm -rf build
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-
+  ```
 После сборки появятся бинарники:
   ```
 - приложение: ./build/task

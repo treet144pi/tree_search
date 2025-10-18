@@ -198,10 +198,11 @@ namespace Trees {
     {
         if (!cmp_(a,b)) return 0;
 
-        iterator fst = upper_bound(a);
-        iterator snd = upper_bound(b);
+        iterator fst = lower_bound(a);
+        iterator snd = lower_bound(b);
         return distance(fst,snd);
     }
+
 //-----------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp >
     int SearchTree<KeyT, Comp>::distance(iterator fst,iterator snd) const

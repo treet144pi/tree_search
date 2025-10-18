@@ -69,11 +69,11 @@ TEST(Bounds, LowerUpper) {
     auto ub40 = t.upper_bound(40); EXPECT_EQ(ub40, nullptr);
 }
 
-TEST(RangeQuery, HalfOpenRightInclusive) {
+TEST(RangeQuery, HalfOpenLeftInclusiveRightOpen) {
     ST t; for (int x : {10,20,30,40}) t.insert(x);
-    EXPECT_EQ(t.range_query(20,40), 2); // (20,40] -> {30,40}
-    EXPECT_EQ(t.range_query(5,10),  1); // (5,10]  -> {10}
-    EXPECT_EQ(t.range_query(40,100),0); // (40,100] -> {}
+    EXPECT_EQ(t.range_query(20,40), 2); // [20,40) -> {20,30}
+    EXPECT_EQ(t.range_query(5,10),  0); // [5,10)  -> 0
+    EXPECT_EQ(t.range_query(40,100),1); // [40,100) -> {40}
     EXPECT_EQ(t.range_query(30,30), 0); // a>=b -> 0
 }
 

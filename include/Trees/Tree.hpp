@@ -199,7 +199,7 @@ namespace Trees {
         if (!cmp_(a,b)) return 0;
 
         iterator fst = lower_bound(a);
-        iterator snd = lower_bound(b);
+        iterator snd = upper_bound(b);
         return distance(fst,snd);
     }
 

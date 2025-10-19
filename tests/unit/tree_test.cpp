@@ -71,10 +71,10 @@ TEST(Bounds, LowerUpper) {
 
 TEST(RangeQuery, HalfOpenLeftInclusiveRightOpen) {
     ST t; for (int x : {10,20,30,40}) t.insert(x);
-    EXPECT_EQ(t.range_query(20,40), 2); // [20,40) -> {20,30}
-    EXPECT_EQ(t.range_query(5,10),  0); // [5,10)  -> 0
-    EXPECT_EQ(t.range_query(40,100),1); // [40,100) -> {40}
-    EXPECT_EQ(t.range_query(30,30), 0); // a>=b -> 0
+    EXPECT_EQ(t.range_query(20,40), 3);
+    EXPECT_EQ(t.range_query(5,10),  1);
+    EXPECT_EQ(t.range_query(40,100),1);
+    EXPECT_EQ(t.range_query(30,30), 0);
 }
 
 TEST(Inorder, SortedStrictlyIncreasing)

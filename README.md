@@ -90,17 +90,8 @@ q 15 40
 # Ctrl+D (Linux/macOS) или Ctrl+Z Enter (Windows) — завершить
 ```
 
-С файлом:
-```bash
-./build/func_tree < tests/e2e/in/1.in > /tmp/tree.out
-```
 
-### 2) Функциональный режим (`std::set`)
-```bash
-./build/func_set < tests/e2e/in/1.in > /tmp/set.out
-```
-
-### 3) Бенчмарк (время выполнения)
+###  Бенчмарк (время выполнения)
 ```bash
 ./build/bench_tree
 ./build/bench_set
@@ -172,8 +163,8 @@ q 20 40
 
 ## Производительность (benchmark)
 
-- Время измеряется **только на выполнении команд**, а не на вводе.
-- Используется `std::chrono::steady_clock`.
+- Время измеряется только на выполнении команд
+- Используется `std::chrono::steady_clock`
 
 
 ---

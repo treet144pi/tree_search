@@ -40,6 +40,11 @@
 
 ---
 
+## Установка
+```
+git clone git@github.com:treet144pi/tree_search.git
+```
+---
 ##  Сборка проекта
 
 ```bash

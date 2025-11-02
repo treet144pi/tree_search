@@ -1,6 +1,4 @@
-#ifndef TREE_SEARCH_TREE_HPP
-#define TREE_SEARCH_TREE_HPP
-
+#pragma once
 
 #include <functional>
 #ifndef NDEBUG
@@ -464,5 +462,3 @@ namespace Trees {
 
 
 }
-
-#endif

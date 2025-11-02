@@ -1,14 +1,17 @@
-# Tree Search (AVL)
+#  Tree Search (AVL)
 
+Поисковое дерево с балансировкой (AVL) и реализация аналогичных функций через `std::set`
+---
 
-## Требования
+##  Требования
 
-- CMake >= 3.16
-- C++17 (g++/clang++)
+- **CMake ≥ 3.16**
+- **C++17** (g++ или clang++)
 
 ---
 
-## Структура проекта
+##  Структура проекта
+
 ```
 .
 ├─ CMakeLists.txt
@@ -17,87 +20,125 @@
 │     └─ Tree.hpp              # шаблонный класс AVL-дерева
 ├─ src/
 │  ├─ runner.hpp
-│  ├─ runner.cpp               # протокол команд
-│  └─ main.cpp                 # int main(){ return launcher(cin, cout); }
+│  ├─ runner.cpp               # раннер для дерева (парсер k/q, вызов Tree)
+│  ├─ func_tree.cpp            # main для функционального режима дерева (печатает ответы)
+│  ├─ bench_tree.cpp           # main для бенча дерева (печатает только время)
+│  ├─ runner_set.hpp
+│  ├─ runner_set.cpp           # раннер для std::set
+│  ├─ func_set.cpp             # main для функционального режима std::set
+│  └─ bench_set.cpp            # main для бенча std::set
 ├─ tests/
 │  ├─ CMakeLists.txt
 │  ├─ e2e_runner.cpp           # e2e-раннер: находит .in/.out и сравнивает
 │  ├─ unit/
-│  │  └─ tree_test.cpp         # GoogleTest
-│  ├─ perf/
-│  │  └─ avl_bench.cpp         # Google Benchmark
+│  │  └─ tree_test.cpp         # GoogleTest-юниты
 │  └─ e2e/
 │     ├─ in/                   # входные .in
 │     └─ out/                  # ожидаемые .out
-└─ build/
+└─ build/                      # создаётся CMake (в .gitignore)
 ```
 
 ---
-## Установка
-  ```
-git clone git@github.com:treet144pi/tree_search.git
-  ```
 
----
-## Сборка
-  ```
+##  Сборка проекта
+
+```bash
 rm -rf build
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-  ```
+```
+
 После сборки появятся бинарники:
-  ```
-- приложение: ./build/task
-- юнит-тесты: ./build/tests/unit_tests
-- e2e-раннер: ./build/tests/e2e
-- бенчмарки: ./build/tests/avl_bench
-  ```
+
+| Бинарник                    | Назначение                                      |
+|----------------------------|--------------------------------------------------|
+| `./build/func_tree`        | функциональный режим для AVL-дерева             |
+| `./build/bench_tree`       | бенчмарк дерева (печатает время)                |
+| `./build/func_set`         | функциональный режим для `std::set`             |
+| `./build/bench_set`        | бенчмарк `std::set` (печатает время)            |
+| `./build/tests/unit_tests` | GoogleTest юниты                                |
+| `./build/tests/e2e`        | e2e-раннер (.in/.out)                           |
 
 ---
 
-## Запуск приложения
+##  Протокол команд (stdin)
 
+- `k X` — вставить ключ `X` (дубликаты игнорируются)
+- `q A B` — посчитать количество ключей в **диапазоне [A, B)**
+  (если `B <= A`, результат `0`)
+
+В функциональном режиме программа печатает ответы через пробел.
+В бенч-режиме — только итоговое время выполнения в наносекундах.
+
+---
+
+##  Примеры запуска
+
+### 1) Функциональный режим (дерево)
 Интерактивно:
 ```bash
-./build/task
-# затем ввод:
-# k 10
-# k 20
-# q 5 10
+./build/func_tree
+k 10
+k 20
+q 5 10
+q 15 40
 # Ctrl+D (Linux/macOS) или Ctrl+Z Enter (Windows) — завершить
 ```
 
 С файлом:
 ```bash
-./build/task < tests/e2e/in/1.in
+./build/func_tree < tests/e2e/in/1.in > /tmp/tree.out
 ```
 
-**Протокол команд:**
-- `k X` — вставить ключ `X` (дубликаты игнорируются)
-- `q A B` — вывести количество ключей
+### 2) Функциональный режим (`std::set`)
+```bash
+./build/func_set < tests/e2e/in/1.in > /tmp/set.out
+```
 
+### 3) Бенчмарк (время выполнения)
+```bash
+./build/bench_tree
+./build/bench_set
+```
+
+Вывод:
+```
+42 ns
+```
 
 ---
-## Юнит-тесты (GoogleTest)
 
+##  Юнит-тесты (GoogleTest)
 
 ```bash
+#зайти в build
+cd build
+ctest --test-dir build -R unit -V
+# или напрямую:
 ./build/tests/unit_tests
-# фильтр по имени тестов:
+# фильтр:
 ./build/tests/unit_tests --gtest_filter=Bounds.*
 ```
 
 ---
 
+##  E2E-тесты
 
-## E2E-тесты (через раннер)
+Раннер автоматически находит пары `.in/.out` и сверяет вывод:
 
-Раннер автоматически находит пары `tests/e2e/in/*.in` ↔ `tests/e2e/out/*.out`
-(совпадающий stem: `1.in` ↔ `1.out`) и сверяет вывод.
+```
+tests/e2e/in/1.in   ↔   tests/e2e/out/1.out
+```
 
-Запуск (из корня проекта):
+Запуск:
 ```bash
 ./build/tests/e2e
+```
+
+Пример вывода:
+```
+[CASE] 1.in : OK
+Summary: 5 / 5 passed
 ```
 
 ### Как добавить новый e2e-кейс
@@ -108,76 +149,56 @@ cmake --build build -j
    ```bash
    ./build/tests/e2e
    ```
-   Пример вывода:
-   ```
-   [CASE] N.in : OK
-   ...
-   Summary: X / Y passed
-   ```
 
-**Формат .in/.out**
+Пример `.in`:
+```
+k 10
+k 20
+q 5 10
+q 20 40
+```
 
-- `.in` — команды можно писать построчно или в одну строку:
-  ```
-  k 10
-  k 20
-  q 5 10
-  q 20 40
-  ```
-  или
-  ```
-  k 10 k 20 q 5 10 q 20 40
-  ```
-
-- `.out` — ответы в том же формате, что печатает программа (обычно построчно):
-  ```
-  1
-  1
-  ```
-
----
-## Бенчмарки (Google Benchmark)
-
-Запуск:
-  ```
-./build/tests/avl_bench
-  ```
-Что меряется
-  ```
-- Insert — вставка 10 000 и 100 000 случайных ключей в пустое дерево
-- LowerBound b UpperBound — 10 000 и 100 000 запросов поиска
-- RangeQuery — 10 000 и 100 000  диапазонных запросов [a, b)
-  ```
----
-
-## Частые проблемы
-
-- No such file or directory [tests/e2e/in] — запускайте e2e-раннер из корня и проверьте наличие tests/e2e/in и tests/e2e/out
+Пример `.out`:
+```
+1 1
+```
 
 ---
 
-## Ссылки на используемые библиотеки
-  ```
-- Google Benchmark — https://github.com/google/benchmark
-- GoogleTest —  https://github.com/google/googletest
-  ```
+## Производительность (benchmark)
+
+- Время измеряется **только на выполнении команд**, а не на вводе.
+- Используется `std::chrono::steady_clock`.
+
+
 ---
 
-## Полезные команды
+## Ссылки
+- [GoogleTest](https://github.com/google/googletest)
+---
 
-Полная пересборка (Release)
+##  Полезные команды
+
+Полная пересборка:
+```bash
 rm -rf build && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+```
 
-
-Юниты
-  ```
+Запуск юнитов:
+```bash
 ./build/tests/unit_tests
-  ```
-E2E
-  ```
+```
+
+Запуск e2e:
+```bash
 ./build/tests/e2e
-  ```
-Бенчи (5 повторов, агрегаты)
-  ```
-./build/tests/avl_bench --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
-  ```
+```
+
+Сравнение производительности:
+```bash
+./build/bench_tree
+./build/bench_set
+```
+
+---
+```

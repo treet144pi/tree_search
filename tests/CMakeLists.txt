@@ -6,19 +6,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-include(FetchContent)
-FetchContent_Declare(
-  benchmark
-  URL https://github.com/google/benchmark/archive/refs/tags/v1.8.4.zip
-)
-set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
-set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(benchmark)
-
-add_executable(avl_bench perf/avl_bench.cpp)
-target_link_libraries(avl_bench PRIVATE benchmark::benchmark trees)
-target_include_directories(avl_bench PRIVATE ${CMAKE_SOURCE_DIR}/include)
-
 add_executable(unit_tests unit/tree_test.cpp)
 target_link_libraries(unit_tests PRIVATE trees gtest gtest_main)
 target_include_directories(unit_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)

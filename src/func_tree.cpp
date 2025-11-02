@@ -3,5 +3,5 @@
 
 int main()
 {
-    return launcher(std::cin, std::cout);
+    return launcher(std::cin, std::cout,false);
 }

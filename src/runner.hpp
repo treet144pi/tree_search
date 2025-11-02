@@ -1,9 +1,7 @@
-#ifndef TREE_RUNNER_HPP
-#define TREE_RUNNER_HPP
+#pragma once
 
 #include <istream>
 #include <ostream>
 
-int launcher(std::istream& in, std:: ostream& out);
+int launcher(std::istream& in, std:: ostream& out, bool benchmark = false);
 
-#endif

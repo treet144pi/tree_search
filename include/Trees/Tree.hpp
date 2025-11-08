@@ -14,7 +14,7 @@ namespace Trees {
                 Node *right_  = nullptr;
                 Node *parent_ = nullptr;
                 int  height_  = 1;
-                size_t size_  = 1;
+                int  size_    = 1;
             };
 
             using iterator = Node *;
@@ -31,7 +31,8 @@ namespace Trees {
 
         private: // Balancing
             int      node_height(iterator node) const { return node ? node->height_ : 0; }
-            void     update_height(iterator root);
+            int      node_size(iterator node) const { return node ? node->size_ : 0; }
+            void     update_metric(iterator root);
 
             iterator rotate_left(iterator root);
             iterator rotate_right(iterator root);
@@ -40,12 +41,13 @@ namespace Trees {
             void     rebalance(iterator root);
             int      balance_factor(iterator current_root) const;
 
-        public: // fucntion for distance
+        public: // distance helpers
 
             iterator successor(iterator current) const;// the next element by value
             iterator minimum(iterator current_node) const; // to find leftmost
+            int count_before(const KeyT& key) const; // count elements less than key
 
-        public: // distance helpers
+        public: // selectors
 
             iterator lower_bound(KeyT key) const; // first not less than key
             iterator upper_bound(KeyT key) const; // first greater then key
@@ -67,7 +69,6 @@ namespace Trees {
 
         public: // for unit test method
             iterator root() const { return top_; }
-
 
     };
 
@@ -135,6 +136,7 @@ namespace Trees {
         iterator node = new Node{ origin->key_};
         node->parent_ = parent;
         node->height_ = origin->height_;
+        node->size_   = origin->size_;
 
         node->left_   = clone_subtree(origin->left_, node);
         node->right_  = clone_subtree(origin->right_, node);
@@ -187,6 +189,32 @@ namespace Trees {
 
         return parent;
     }
+    template <typename KeyT, typename Comp >
+    int SearchTree<KeyT,Comp>::count_before(const KeyT& key) const
+    {
+        int counter         = 0;
+        iterator cur_it     = top_;
+
+        while (cur_it)
+        {
+            if (cmp_(key,cur_it->key_)) cur_it = cur_it->left_;
+            else if (cmp_(cur_it->key_, key))
+            {
+                counter += 1 + node_size(cur_it->left_);
+                cur_it   = cur_it->right_;
+            }
+            else
+            {
+                counter += node_size(cur_it->left_);
+                break;
+            }
+
+        }
+
+
+            return counter;
+
+    }
 //-----------------------------------------------------------------------------------------------------
 //--------------------------- Selectors ---------------------------------------------------------------
 
@@ -208,16 +236,10 @@ namespace Trees {
         if (fst == nullptr) return 0;
         if (fst == snd) return 0;
 
-        iterator current_node = fst;
-        int counter = 0;
-        while (current_node != snd && current_node)
-        {
-            counter++;
-            current_node = successor(current_node);
-        }
-        return counter;
+        int count_fst =  fst ? count_before(fst->key_) : 0;
+        int count_snd =  snd ? count_before(snd->key_) : node_size(top_);
 
-
+        return (count_snd - count_fst);
     }
 //------------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp >
@@ -265,10 +287,13 @@ namespace Trees {
 //------------------------------------------------------------------------------------------------------
 //----------------------------- Balancing --------------------------------------------------------------
     template <typename KeyT, typename Comp>
-    void SearchTree<KeyT, Comp>::update_height(iterator root)
+    void SearchTree<KeyT, Comp>::update_metric(iterator root)
     {
+
         int max_height = node_height(root->left_) > node_height(root->right_)  ? node_height(root->left_): node_height(root->right_);
         root->height_ =  1 + max_height;
+        root->size_   =  1 + node_size(root->left_) + node_size(root->right_);
+
     }
 
 
@@ -294,7 +319,7 @@ namespace Trees {
         while (current_root)
         {
 
-            update_height(current_root);
+            update_metric(current_root);
             int bf  = balance_factor(current_root);
 
             if (bf <-1 ||bf > 1)
@@ -337,8 +362,8 @@ namespace Trees {
         root->parent_            = new_root;
 
         if (temp_right) temp_right->parent_ = root;
-        update_height(root);
-        update_height(new_root);
+        update_metric(root);
+        update_metric(new_root);
 
         return new_root;
     }
@@ -375,8 +400,8 @@ namespace Trees {
         root->parent_      = new_root;
 
         if (temp_left) temp_left->parent_ = root;
-        update_height(root);
-        update_height(new_root);
+        update_metric(root);
+        update_metric(new_root);
 
         return new_root;
     }

@@ -1,7 +1,15 @@
 #include <gtest/gtest.h>
 #include <Trees/Tree.hpp>
-
+#include <random>
+#include <vector>
 using ST = Trees::SearchTree<int>;
+static std::vector<int> make_data(size_t n, uint32_t seed=42) {
+    std::mt19937 rng(seed);
+    std::uniform_int_distribution<int> d(-1'000'000, 1'000'000);
+    std::vector<int> v(n);
+    for (auto& x : v) x = d(rng);
+    return v;
+}
 
 TEST(Bounds, EmptyTree)
 {
@@ -109,4 +117,51 @@ TEST(RuleOfFive, CopyAndMove) {
     e = std::move(b);
     EXPECT_EQ(e.range_query(0,100), 3);
     EXPECT_EQ(b.root(), nullptr);
+}
+
+TEST(DistanceFast, MatchesStdSetOnRandomData) {
+    ST t;
+    std::set<int> s;
+
+    auto data = make_data(5000);
+    for (int x : data) { t.insert(x); s.insert(x); }
+    std::vector<std::pair<int,int>> qs = {
+        {-1'000'000, 1'000'000}, {-52,52}, {0,0}, {10,100}, {-100, -10}, {123, 456}
+    };
+
+    for (auto [a,b] : qs) {
+        auto it_t_f = t.lower_bound(a);
+        auto it_t_s = t.upper_bound(b);
+        int got = t.distance(it_t_f, it_t_s);
+
+        auto it_s_f = s.lower_bound(a);
+        auto it_s_s = s.upper_bound(b);
+        int exp = static_cast<int>(std::distance(it_s_f, it_s_s));
+        EXPECT_EQ(got, exp);
+    }
+}
+TEST(DistanceFast, EdgeCases) {
+    ST t;
+    std::set<int> s;
+    for (int x : {10,20,30,40}) { t.insert(x); s.insert(x); }
+
+    auto it_t_f = t.lower_bound(15);
+    auto it_t_s = t.upper_bound(std::numeric_limits<int>::max());
+    int got = t.distance(it_t_f, it_t_s);
+
+    auto it_s_f = s.lower_bound(15);
+    auto it_s_s = s.end();
+    int exp             = static_cast<int>(std::distance(it_s_f, it_s_s));
+    EXPECT_EQ(got, exp);
+
+    ST empty;
+    auto f2     = empty.lower_bound(0);
+    auto s2     = empty.upper_bound(100);
+    int empty_got  = empty.distance(f2,s2);
+    EXPECT_EQ(empty_got, 0);
+
+    auto f3 = t.lower_bound(40);
+    auto s3 = t.upper_bound(10);
+    int t_got   = t.distance(f3,s3);
+    EXPECT_EQ(t_got, -2);
 }

@@ -23,47 +23,6 @@ TEST(RangeQuery, EmptyTree)
     EXPECT_EQ(t.range_query(40,50),0);
 }
 
-TEST(MinimumAndSuccessor,EmptyTree)
-{
-    ST t;
-    EXPECT_EQ(t.minimum(t.root()), nullptr);
-    EXPECT_EQ(t.successor(nullptr), nullptr);
-}
-
-TEST(Minimum,FindMiniumSubTree)
-{
-    ST t;
-    for (int x: {20,53,89,37}) t.insert(x);
-    auto min20 =t.minimum(t.root()); ASSERT_NE(min20,nullptr); EXPECT_EQ(min20->key_,20);// minimum == 20
-
-    t.insert(5);
-    auto min5 =t.minimum(t.root()); ASSERT_NE(min5,nullptr); EXPECT_EQ(min5->key_,5);// minimum == 5
-
-    t.insert(6);
-    auto remin5 =t.minimum(t.root()); ASSERT_NE(remin5,nullptr); EXPECT_EQ(remin5->key_,5); // minimum == 5
-
-    t.insert(1);
-    auto min1 =t.minimum(t.root()); ASSERT_NE(min1,nullptr); EXPECT_EQ(min1->key_,1);// minimum == 1
-
-    t.insert(-6);
-    auto minminus6 =t.minimum(t.root()); ASSERT_NE(minminus6,nullptr); EXPECT_EQ(minminus6->key_,-6);// minimum == 1
-
-
-}
-
-TEST(InsertAndOrder, BasicInorderBySuccessor) {
-    ST t;
-    for (int x : {30, 10, 40, 20}) t.insert(x);
-
-    auto cur = t.lower_bound(std::numeric_limits<int>::min());
-    if (!cur) cur = t.root();
-    std::vector<int> got;
-    auto min = t.root();
-    while (min && min->left_) min = min->left_;
-    for (auto p = min; p; p = t.successor(p)) got.push_back(p->key_);
-
-    EXPECT_EQ((std::vector<int>{10,20,30,40}), got);
-}
 
 TEST(Bounds, LowerUpper) {
     ST t; for (int x : {10,20,30,40}) t.insert(x);

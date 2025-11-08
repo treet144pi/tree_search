@@ -126,6 +126,7 @@ namespace Trees {
 
 //-----------------------------------------------------------------------------------------------------
 //--------------------------- Memory management -------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
 
     template <typename KeyT, typename Comp >
     typename SearchTree<KeyT, Comp>::iterator
@@ -159,36 +160,8 @@ namespace Trees {
     }
 //-----------------------------------------------------------------------------------------------------
 //--------------------------- Distance helpers  -------------------------------------------------------
-
-    template <typename KeyT, typename Comp >
-    typename SearchTree<KeyT, Comp>::iterator
-    SearchTree<KeyT, Comp>::minimum(iterator current_node) const
-    {
-        if (!current_node) return nullptr;
-
-        while (current_node->left_)
-            current_node = current_node->left_;
-        return current_node;
-    }
 //-----------------------------------------------------------------------------------------------------
-    template <typename KeyT, typename Comp >
-    typename SearchTree<KeyT, Comp>::iterator
-    SearchTree<KeyT, Comp>::successor(iterator current) const
-    {
-        if (!current) return nullptr;
 
-        if (current->right_)
-            return minimum(current->right_);
-
-        iterator parent = current->parent_;
-        while (parent && parent->right_ == current)
-        {
-            current= current->parent_;
-            parent = current->parent_;
-        }
-
-        return parent;
-    }
     template <typename KeyT, typename Comp >
     int SearchTree<KeyT,Comp>::count_before(const KeyT& key) const
     {
@@ -217,6 +190,7 @@ namespace Trees {
     }
 //-----------------------------------------------------------------------------------------------------
 //--------------------------- Selectors ---------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
 
     template <typename KeyT, typename Comp >
     int SearchTree<KeyT, Comp>::range_query(KeyT a, KeyT b) const
@@ -286,6 +260,7 @@ namespace Trees {
 
 //------------------------------------------------------------------------------------------------------
 //----------------------------- Balancing --------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp>
     void SearchTree<KeyT, Comp>::update_metric(iterator root)
     {
@@ -427,8 +402,9 @@ namespace Trees {
 
         return root;
     }
-//-------------------------------------------------------------------------------------------------------------
-//---------------------- Insertion helpers --------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
+//---------------------- Insertion helpers ------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp >
     typename SearchTree<KeyT, Comp>::iterator
     SearchTree< KeyT, Comp>::bst_insert(KeyT key)
@@ -468,6 +444,7 @@ namespace Trees {
 
 //-------------------------------------------------------------------------------------------------------
 //---------------------------- modifiers ----------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
 
     template <typename KeyT, typename Comp >
     void SearchTree< KeyT, Comp>::insert(KeyT key)

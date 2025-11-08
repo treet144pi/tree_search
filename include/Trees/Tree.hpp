@@ -1,9 +1,7 @@
 #pragma once
 
 #include <functional>
-#ifndef NDEBUG
-#include <cassert>
-#endif
+
 namespace Trees {
 
     template <typename KeyT, typename Comp = std::less<KeyT>>
@@ -16,6 +14,7 @@ namespace Trees {
                 Node *right_  = nullptr;
                 Node *parent_ = nullptr;
                 int  height_  = 1;
+                size_t size_  = 1;
             };
 
             using iterator = Node *;
@@ -311,10 +310,7 @@ namespace Trees {
     typename SearchTree<KeyT, Comp>::iterator
     SearchTree< KeyT, Comp>::rotate_right(iterator root)
     {
-        #ifndef NDEBUG
-        assert (root && "root == nullptr");
-        assert (root->left_ && "root->left == nullptr");
-        #endif
+
 
         iterator new_root    = root->left_;
 
@@ -353,10 +349,6 @@ namespace Trees {
     typename SearchTree<KeyT, Comp>::iterator
     SearchTree< KeyT, Comp>::rotate_left(iterator root)
     {
-        #ifndef NDEBUG
-        assert (root && "root == nullptr");
-        assert (root->right_ && "root->right == nullptr");
-        #endif
 
         iterator new_root    = root->right_;
 

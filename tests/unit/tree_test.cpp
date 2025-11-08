@@ -44,15 +44,6 @@ TEST(RangeQuery, HalfOpenLeftInclusiveRightOpen) {
     EXPECT_EQ(t.range_query(30,30), 0);
 }
 
-TEST(Inorder, SortedStrictlyIncreasing)
-{
-    ST t; for (int x: {5,3,7,1,4,6,8}) t.insert(x);
-    std::vector<int> v;
-    for (auto p = t.minimum(t.root()); p; p = t.successor(p)) v.push_back(p->key_);
-    for (size_t i = 1; i < v.size(); ++i) EXPECT_LT(v[i-1], v[i]);
-    EXPECT_EQ((std::vector<int>{1,3,4,5,6,7,8}), v);
-}
-
 TEST(RuleOfFive, CopyAndMove) {
     ST a; for (int x : {10,20,30}) a.insert(x);
 

@@ -41,10 +41,8 @@ namespace Trees {
             void     rebalance(iterator root);
             int      balance_factor(iterator current_root) const;
 
-        public: // distance helpers
+        private: // distance helpers
 
-            iterator successor(iterator current) const;// the next element by value
-            iterator minimum(iterator current_node) const; // to find leftmost
             int count_before(const KeyT& key) const; // count elements less than key
 
         public: // selectors

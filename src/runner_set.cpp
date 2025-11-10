@@ -58,8 +58,8 @@ int launcher_set(std::istream& in, std::ostream& out, bool benchmark)
 
     if (benchmark)
     {
-        auto nas = std::chrono::duration_cast<std::chrono::nanoseconds>(acc).count();
-        out << nas << " ns\n";
+        auto nas = std::chrono::duration_cast<std::chrono::milliseconds>(acc).count();
+        out << nas << " ms\n";
     }
     else
     {

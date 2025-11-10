@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 
 namespace Trees {
 
@@ -22,6 +23,14 @@ namespace Trees {
             iterator top_     = nullptr; // root tree;
             Comp     cmp_; // comparator
 
+            struct Block_Memory
+            {
+                iterator begin_ = nullptr;
+                iterator cur_   = nullptr;
+                iterator end_   = nullptr; // after past
+            };
+
+            std::vector<Block_Memory> mem_blocks_;
 
         public: // modifiers
             void    insert(KeyT key);
@@ -30,9 +39,9 @@ namespace Trees {
             iterator bst_insert(KeyT key); // standard insert in binary search tree
 
         private: // Balancing
-            int      node_height(iterator node) const { return node ? node->height_ : 0; }
-            int      node_size(iterator node) const { return node ? node->size_ : 0; }
-            void     update_metric(iterator root);
+            int            node_height(iterator node) const { return node ? node->height_ : 0; }
+            int            node_size(iterator node) const { return node ? node->size_ : 0; }
+            inline void    update_metric(iterator root);
 
             iterator rotate_left(iterator root);
             iterator rotate_right(iterator root);
@@ -43,7 +52,7 @@ namespace Trees {
 
         private: // distance helpers
 
-            int count_before(const KeyT& key) const; // count elements less than key
+            int      count_before(const KeyT& key) const; // count elements less than key
 
         public: // selectors
 
@@ -53,8 +62,11 @@ namespace Trees {
             int      range_query(KeyT a,KeyT b) const;
 
         private: // memory management
+            void     add_block();
+            iterator get_node(const KeyT& key);
+            void     destroy_blocks_memory();
+
             iterator clone_subtree(iterator origin, iterator parent);
-            void     destroy_subtree(iterator node);
 
         public:
             SearchTree() = default;
@@ -81,7 +93,7 @@ namespace Trees {
     template <typename KeyT, typename Comp>
     SearchTree<KeyT, Comp>::~SearchTree()
     {
-        destroy_subtree(top_);
+        destroy_blocks_memory();
         top_ = nullptr;
     }
 
@@ -91,18 +103,19 @@ namespace Trees {
     {
         if (this == &other_tree) return *this;
 
-        iterator new_top = clone_subtree(other_tree.top_, nullptr);
-        destroy_subtree(top_);
+        SearchTree tmp{other_tree};
 
-        top_   = new_top;
-        cmp_   = other_tree.cmp_;
+        std::swap(top_,       tmp.top_);
+        std::swap(cmp_,       tmp.cmp_);
+        std::swap(mem_blocks_,tmp.mem_blocks_);
 
         return *this;
     }
 
 //-----------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp>
-    SearchTree<KeyT, Comp>::SearchTree(SearchTree&& other_tree): top_(other_tree.top_), cmp_(std::move(other_tree.cmp_))
+    SearchTree<KeyT, Comp>::SearchTree(SearchTree&& other_tree): top_(other_tree.top_), cmp_(std::move(other_tree.cmp_)),
+                                                                 mem_blocks_(std::move(other_tree.mem_blocks_))
     {
         other_tree.top_ = nullptr;
     }
@@ -113,9 +126,11 @@ namespace Trees {
     {
         if (this == &other_tree) return *this;
 
-        destroy_subtree(top_);
+        destroy_blocks_memory();
         top_             = other_tree.top_;
         cmp_             = std::move(other_tree.cmp_);
+        mem_blocks_      = std::move(other_tree.mem_blocks_);
+
         other_tree.top_  = nullptr;
 
         return *this;
@@ -125,6 +140,40 @@ namespace Trees {
 //-----------------------------------------------------------------------------------------------------
 //--------------------------- Memory management -------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
+    template <typename KeyT, typename Comp>
+    void SearchTree<KeyT, Comp>::add_block()
+    {
+        size_t prev_capacity = mem_blocks_.empty() ? 0: static_cast<size_t> (mem_blocks_.back().end_ - mem_blocks_.back().begin_);
+        size_t new_capacity  = prev_capacity ? prev_capacity*2: 4;
+
+        iterator new_mem   = static_cast<iterator> (::operator new[](new_capacity * sizeof(Node)));
+        mem_blocks_.push_back(Block_Memory{new_mem,new_mem,new_mem+new_capacity});
+    }
+
+    template <typename KeyT, typename Comp >
+    typename SearchTree<KeyT, Comp>::iterator
+    SearchTree<KeyT, Comp>::get_node(const KeyT& key)
+    {
+        if (mem_blocks_.empty() || (mem_blocks_.back().cur_ == mem_blocks_.back().end_)) add_block();
+
+        Block_Memory& last_block = mem_blocks_.back();
+        iterator cur_node        = last_block.cur_++;
+        ::new (cur_node) Node{key};
+        return cur_node;
+    }
+
+
+    template <typename KeyT, typename Comp>
+    void SearchTree<KeyT, Comp>::destroy_blocks_memory()
+    {
+        for (auto& m_b :mem_blocks_)
+        {
+            for (iterator it = m_b.begin_; it != m_b.cur_;++it)
+                it->~Node();
+            ::operator delete[](m_b.begin_);
+        }
+        mem_blocks_.clear();
+    }
 
     template <typename KeyT, typename Comp >
     typename SearchTree<KeyT, Comp>::iterator
@@ -132,7 +181,7 @@ namespace Trees {
     {
         if (!origin)   return nullptr;
 
-        iterator node = new Node{ origin->key_};
+        iterator node = get_node(origin->key_);
         node->parent_ = parent;
         node->height_ = origin->height_;
         node->size_   = origin->size_;
@@ -144,18 +193,7 @@ namespace Trees {
 
     }
 
-//-----------------------------------------------------------------------------------------------------
 
-    template<typename KeyT, typename Comp>
-    void SearchTree<KeyT, Comp>::destroy_subtree(iterator node)
-    {
-        if (!node) return;
-
-        destroy_subtree(node->left_);
-        destroy_subtree(node->right_);
-
-        delete node;
-    }
 //-----------------------------------------------------------------------------------------------------
 //--------------------------- Distance helpers  -------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
@@ -168,8 +206,9 @@ namespace Trees {
 
         while (cur_it)
         {
-            if (cmp_(key,cur_it->key_)) cur_it = cur_it->left_;
-            else if (cmp_(cur_it->key_, key))
+            const KeyT& k = cur_it->key_;
+            if (cmp_(key,k)) cur_it = cur_it->left_;
+            else if (cmp_(k, key))
             {
                 counter += 1 + node_size(cur_it->left_);
                 cur_it   = cur_it->right_;
@@ -208,9 +247,8 @@ namespace Trees {
         if (fst == nullptr) return 0;
         if (fst == snd) return 0;
 
-        int count_fst =  fst ? count_before(fst->key_) : 0;
+        int count_fst =  count_before(fst->key_);
         int count_snd =  snd ? count_before(snd->key_) : node_size(top_);
-
         return (count_snd - count_fst);
     }
 //------------------------------------------------------------------------------------------------------
@@ -260,7 +298,7 @@ namespace Trees {
 //----------------------------- Balancing --------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp>
-    void SearchTree<KeyT, Comp>::update_metric(iterator root)
+    inline void SearchTree<KeyT, Comp>::update_metric(iterator root)
     {
 
         int max_height = node_height(root->left_) > node_height(root->right_)  ? node_height(root->left_): node_height(root->right_);
@@ -409,7 +447,7 @@ namespace Trees {
     {
         if (!top_) // top_ == nullptr
         {
-            top_ = new Node{key};
+            top_ = get_node(key);
             return top_;
         }
 
@@ -428,7 +466,7 @@ namespace Trees {
                 return child; // not duplicate
         }
 
-        child          = new Node{key};
+        child          = get_node(key);
 
         child->parent_ = parent;
 

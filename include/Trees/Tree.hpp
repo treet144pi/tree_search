@@ -144,7 +144,7 @@ namespace Trees {
     void SearchTree<KeyT, Comp>::add_block()
     {
         size_t prev_capacity = mem_blocks_.empty() ? 0: static_cast<size_t> (mem_blocks_.back().end_ - mem_blocks_.back().begin_);
-        size_t new_capacity  = prev_capacity ? prev_capacity*2: 4;
+        size_t new_capacity  = prev_capacity ? prev_capacity*2: 512;
 
         iterator new_mem   = static_cast<iterator> (::operator new[](new_capacity * sizeof(Node)));
         mem_blocks_.push_back(Block_Memory{new_mem,new_mem,new_mem+new_capacity});

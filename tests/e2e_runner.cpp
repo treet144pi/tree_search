@@ -1,10 +1,11 @@
+#include "runner.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 #include <vector>
 #include <algorithm>
-#include "runner.hpp"
+#include <cctype>
 
 namespace fs = std::filesystem;
 
@@ -15,7 +16,7 @@ static std::string read_all(const fs::path& p) {
 }
 
 static void trim_right(std::string& s) {
-    while (!s.empty() && (s.back()==' ' || s.back()=='\n' || s.back()=='\r'))
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back())))
         s.pop_back();
 }
 
@@ -24,7 +25,7 @@ static std::string normalize_ws(std::string s) {
     std::string r; r.reserve(s.size());
     bool ws = false;
     for (char c : s) {
-        if (c==' ' || c=='\n') { ws = true; continue; }
+        if (std::isspace(static_cast<unsigned char>(c))) { ws = true; continue; }
         if (ws) { if (!r.empty()) r.push_back(' '); ws = false; }
         r.push_back(c);
     }

@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <vector>
-
 namespace Trees {
 
     template <typename KeyT, typename Comp = std::less<KeyT>>
@@ -33,10 +32,10 @@ namespace Trees {
             std::vector<Block_Memory> mem_blocks_;
 
         public: // modifiers
-            void    insert(KeyT key);
+            void    insert(const KeyT& key);
 
         private: // Insertion helpers
-            iterator bst_insert(KeyT key); // standard insert in binary search tree
+            iterator bst_insert(const KeyT& key); // standard insert in binary search tree
 
         private: // Balancing
             int            node_height(iterator node) const { return node ? node->height_ : 0; }
@@ -56,10 +55,10 @@ namespace Trees {
 
         public: // selectors
 
-            iterator lower_bound(KeyT key) const; // first not less than key
-            iterator upper_bound(KeyT key) const; // first greater then key
+            iterator lower_bound(const KeyT& key) const; // first not less than key
+            iterator upper_bound(const KeyT& key) const; // first greater then key
             int      distance(iterator fst,iterator snd) const;
-            int      range_query(KeyT a,KeyT b) const;
+            int      range_query(const KeyT& a,const KeyT& b) const;
 
         private: // memory management
             void     add_block();
@@ -75,7 +74,7 @@ namespace Trees {
             SearchTree& operator=(const SearchTree& other_tree);
             SearchTree(SearchTree && other_tree);
             SearchTree& operator=(SearchTree&& other_tree);
-            ~SearchTree();
+            virtual ~SearchTree();
 
         public: // for unit test method
             iterator root() const { return top_; }
@@ -230,7 +229,7 @@ namespace Trees {
 //-----------------------------------------------------------------------------------------------------
 
     template <typename KeyT, typename Comp >
-    int SearchTree<KeyT, Comp>::range_query(KeyT a, KeyT b) const
+    int SearchTree<KeyT, Comp>::range_query(const KeyT& a, const KeyT& b) const
     {
         if (!cmp_(a,b)) return 0;
 
@@ -254,7 +253,7 @@ namespace Trees {
 //------------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp >
     typename SearchTree<KeyT, Comp>::iterator
-    SearchTree<KeyT, Comp>::lower_bound(KeyT key) const
+    SearchTree<KeyT, Comp>::lower_bound(const KeyT& key) const
     {
         iterator current_node = top_;
         iterator best_node    = nullptr;
@@ -275,7 +274,7 @@ namespace Trees {
 //------------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp >
     typename SearchTree<KeyT, Comp>::iterator
-    SearchTree<KeyT, Comp>::upper_bound(KeyT key) const
+    SearchTree<KeyT, Comp>::upper_bound(const KeyT& key) const
     {
         iterator current_node = top_;
         iterator best_node    = nullptr;
@@ -443,7 +442,7 @@ namespace Trees {
 //-----------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp >
     typename SearchTree<KeyT, Comp>::iterator
-    SearchTree< KeyT, Comp>::bst_insert(KeyT key)
+    SearchTree< KeyT, Comp>::bst_insert(const KeyT& key)
     {
         if (!top_) // top_ == nullptr
         {
@@ -483,7 +482,7 @@ namespace Trees {
 //-----------------------------------------------------------------------------------------------------
 
     template <typename KeyT, typename Comp >
-    void SearchTree< KeyT, Comp>::insert(KeyT key)
+    void SearchTree< KeyT, Comp>::insert(const KeyT& key)
     {
         iterator new_node = bst_insert(key);
         rebalance(new_node);

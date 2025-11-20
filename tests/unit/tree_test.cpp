@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <Trees/Tree.hpp>
+#include <gtest/gtest.h>
 #include <random>
 #include <vector>
 using ST = Trees::SearchTree<int>;

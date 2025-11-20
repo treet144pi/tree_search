@@ -17,6 +17,7 @@ int launcher(std::istream& in, std::ostream& out, bool benchmark)
         {
             int x;
             in >> x;
+            if (!in.good()) break;
 
             if (benchmark)
             {
@@ -34,6 +35,7 @@ int launcher(std::istream& in, std::ostream& out, bool benchmark)
         {
             int a, b;
             in >> a >> b;
+            if (!in.good()) break;
             if (benchmark)
             {
                 auto t0 = clock::now();

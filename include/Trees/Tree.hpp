@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <vector>
+#include <stdexcept>
+
 namespace Trees {
 
     template <typename KeyT, typename Comp = std::less<KeyT>>
@@ -86,7 +88,13 @@ namespace Trees {
     template <typename KeyT, typename Comp>
     SearchTree<KeyT, Comp>::SearchTree(const SearchTree& other_tree): top_(nullptr), cmp_(other_tree.cmp_)
     {
-        top_ = clone_subtree(other_tree.top_,nullptr);
+        try {
+            top_ = clone_subtree(other_tree.top_,nullptr);
+        }
+        catch (...) {
+            destroy_blocks_memory();
+            throw;
+        }
     }
 //-----------------------------------------------------------------------------------------------------
     template <typename KeyT, typename Comp>
@@ -156,8 +164,9 @@ namespace Trees {
         if (mem_blocks_.empty() || (mem_blocks_.back().cur_ == mem_blocks_.back().end_)) add_block();
 
         Block_Memory& last_block = mem_blocks_.back();
-        iterator cur_node        = last_block.cur_++;
+        iterator cur_node        = last_block.cur_;
         ::new (cur_node) Node{key};
+        last_block.cur_++; // after memory allocation
         return cur_node;
     }
 
@@ -231,7 +240,10 @@ namespace Trees {
     template <typename KeyT, typename Comp >
     int SearchTree<KeyT, Comp>::range_query(const KeyT& a, const KeyT& b) const
     {
-        if (!cmp_(a,b)) return 0;
+        if (!cmp_(a,b))
+        {
+           ;return 0;
+        }
 
         iterator fst = lower_bound(a);
         iterator snd = upper_bound(b);

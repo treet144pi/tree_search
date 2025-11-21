@@ -3,6 +3,8 @@
 #include <chrono>
 #include <iterator>
 #include <iostream>
+#include <stdexcept>
+
 int launcher_set(std::istream& in, std::ostream& out, bool benchmark)
 {
     using clock = std::chrono::steady_clock;
@@ -11,51 +13,65 @@ int launcher_set(std::istream& in, std::ostream& out, bool benchmark)
     std::set<int> tree;
     char op;
     ns acc{0};
-    while (in >> op)
+    try
     {
-        if (op == 'k')
+        while (in >> op)
         {
-            int x;
-            in >> x;
-            if (!in.good()) break;
-            if (benchmark)
+            if (op == 'k')
             {
-                auto t0 = clock::now();
-                tree.insert(x);
-                auto t1 = clock::now();
-                acc += (t1 - t0);
-            } else
+                int x;
+                in >> x;
+                if (!in.good())
+                {
+                    throw std::runtime_error("failed to read ");
+                }
+                if (benchmark)
+                {
+                    auto t0 = clock::now();
+                    tree.insert(x);
+                    auto t1 = clock::now();
+                    acc += (t1 - t0);
+                } else
+                {
+                    tree.insert(x);
+                }
+            }
+            else if (op == 'q')
             {
-                tree.insert(x);
+                int a, b;
+                in >> a >> b;
+                if (!in.good())
+                {
+                    throw std::runtime_error("failed to read ");
+                }
+                if (benchmark) {
+                    auto t0 = clock::now();
+
+                    int ans = 0;
+                    if (b > a) {
+                        auto fst = tree.lower_bound(a);
+                        auto snd = tree.upper_bound(b);
+                        ans = std::distance(fst, snd);
+                    }
+
+                    auto t1 = clock::now();
+                    acc += (t1 - t0);
+                } else {
+                    int ans = 0;
+                    if (b > a) {
+                        auto fst = tree.lower_bound(a);
+                        auto snd = tree.upper_bound(b);
+                        ans = std::distance(fst, snd);
+                    }
+                    out << ans << ' ';
+                }
             }
         }
-        else if (op == 'q')
-        {
-            int a, b;
-            in >> a >> b;
-            if (!in.good()) break;
-            if (benchmark) {
-                auto t0 = clock::now();
-
-                int ans = 0;
-                if (b > a) {
-                    auto fst = tree.lower_bound(a);
-                    auto snd = tree.upper_bound(b);
-                    ans = std::distance(fst, snd);
-                }
-
-                auto t1 = clock::now();
-                acc += (t1 - t0);
-            } else {
-                int ans = 0;
-                if (b > a) {
-                    auto fst = tree.lower_bound(a);
-                    auto snd = tree.upper_bound(b);
-                    ans = std::distance(fst, snd);
-                }
-                out << ans << ' ';
-            }
-        }
+    }
+    catch (const std::exception& ex)
+    {
+        out << ex.what() << '\n';
+        return 1;
     }
 
     if (benchmark)

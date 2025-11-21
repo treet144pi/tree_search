@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include <exception>
 
 namespace fs = std::filesystem;
 
@@ -39,68 +40,77 @@ static void print_diff(const std::string& got, const std::string& exp) {
               << "\n--------------------\n";
 }
 
-int main() {
-#ifdef TESTS_DIR
-    fs::path in_dir  = fs::path(TESTS_DIR) / "e2e" / "in";
-    fs::path out_dir = fs::path(TESTS_DIR) / "e2e" / "out";
-#else
-    fs::path in_dir  = "tests/e2e/in";
-    fs::path out_dir = "tests/e2e/out";
-#endif
+int main()
+{
+    try {
+        #ifdef TESTS_DIR
+        fs::path in_dir  = fs::path(TESTS_DIR) / "e2e" / "in";
+        fs::path out_dir = fs::path(TESTS_DIR) / "e2e" / "out";
+        #else
+        fs::path in_dir  = "tests/e2e/in";
+        fs::path out_dir = "tests/e2e/out";
+        #endif
 
-    if (!fs::exists(in_dir) || !fs::is_directory(in_dir)) {
-        std::cerr << "No input dir: " << in_dir << "\n";
-        return 2;
-    }
-    if (!fs::exists(out_dir) || !fs::is_directory(out_dir)) {
-        std::cerr << "No output dir: " << out_dir << "\n";
-        return 2;
-    }
+        if (!fs::exists(in_dir) || !fs::is_directory(in_dir)) {
+            std::cerr << "No input dir: " << in_dir << "\n";
+            return 2;
+        }
+        if (!fs::exists(out_dir) || !fs::is_directory(out_dir)) {
+            std::cerr << "No output dir: " << out_dir << "\n";
+            return 2;
+        }
 
-    std::vector<fs::path> ins, outs;
-    for (auto& e : fs::directory_iterator(in_dir))
-        if (e.is_regular_file() && e.path().extension()==".in")
-            ins.push_back(e.path());
-    for (auto& e : fs::directory_iterator(out_dir))
-        if (e.is_regular_file() && e.path().extension()==".out")
-            outs.push_back(e.path());
-
-    auto by_name = [](const fs::path& a, const fs::path& b){
-        return a.filename().string() < b.filename().string();
-    };
-    std::sort(ins.begin(), ins.end(), by_name);
-    std::sort(outs.begin(), outs.end(), by_name);
-
-    if (ins.size() != outs.size()) {
-        std::cerr << "Count mismatch: inputs=" << ins.size()
-                  << " outputs=" << outs.size() << "\n";
-        return 3;
-    }
-
-    int passed = 0;
-    for (size_t i = 0; i < ins.size(); ++i) {
-        std::istringstream in(read_all(ins[i]));
-        std::ostringstream out;
-        int rc = launcher(in, out);
-
-        std::string got = out.str();
-        std::string exp = read_all(outs[i]);
-        bool ok = (rc == 0 && got == exp);
-        if (!ok) {
-            std::string gotN = normalize_ws(got);
-            std::string expN = normalize_ws(exp);
-            ok = (rc == 0 && gotN == expN);
-            if (!ok) {
-                std::cout << "[CASE] " << ins[i].filename().string() << " : FAIL\n";
-                print_diff(got, exp);
-                continue;
+        std::vector<fs::path> ins, outs;
+        for (auto& e : fs::directory_iterator(in_dir)) {
+            if (e.is_regular_file() && e.path().extension() == ".in") {
+                ins.push_back(e.path());
+            }
+        }
+        for (auto& e : fs::directory_iterator(out_dir)) {
+            if (e.is_regular_file() && e.path().extension() == ".out") {
+                outs.push_back(e.path());
             }
         }
 
-        std::cout << "[CASE] " << ins[i].filename().string() << " : OK\n";
-        ++passed;
-    }
+        auto by_name = [](const fs::path& a, const fs::path& b) {
+            return a.filename().string() < b.filename().string();
+        };
+        std::sort(ins.begin(), ins.end(), by_name);
+        std::sort(outs.begin(), outs.end(), by_name);
 
-    std::cout << "\nSummary: " << passed << " / " << ins.size() << " passed\n";
-    return (passed == (int)ins.size()) ? 0 : 1;
+        if (ins.size() != outs.size()) {
+            std::cerr << "Count mismatch: inputs=" << ins.size()
+                      << " outputs=" << outs.size() << "\n";
+            return 3;
+        }
+
+        int passed = 0;
+        for (size_t i = 0; i < ins.size(); ++i) {
+            std::istringstream in(read_all(ins[i]));
+            std::ostringstream out;
+            int rc = launcher(in, out);
+            std::string got = out.str();
+            std::string exp = read_all(outs[i]);
+            bool ok = (rc == 0 && got == exp);
+            if (!ok) {
+                std::string gotN = normalize_ws(got);
+                std::string expN = normalize_ws(exp);
+                ok = (rc == 0 && gotN == expN);
+                if (!ok) {
+                    std::cout << "[CASE] " << ins[i].filename().string() << " : FAIL\n";
+                    print_diff(got, exp);
+                    continue;
+                }
+            }
+            std::cout << "[CASE] " << ins[i].filename().string() << " : OK\n";
+            ++passed;
+        }
+
+        std::cout << "\nSummary: " << passed << " / " << ins.size() << " passed\n";
+        return (passed == (int)ins.size()) ? 0 : 1;
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << "\n";
+        return 1;
+    }
 }

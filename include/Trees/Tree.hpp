@@ -242,7 +242,7 @@ namespace Trees {
     {
         if (!cmp_(a,b))
         {
-           ;return 0;
+           return 0;
         }
 
         iterator fst = lower_bound(a);
